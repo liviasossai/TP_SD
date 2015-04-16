@@ -1,0 +1,25 @@
+ {
+  "name": “MemoryBlock”,
+  "version": "0.1.0",
+  "description": "Um jogo da memória distribuído”,
+  "main": "server/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/liviasossai/cefet-web-geiser.git"
+  },
+  "author": "livia",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/liviasossai/cefet-web-geiser/issues"
+  },
+  "homepage": "https://github.com/liviasossai/cefet-web-geiser",
+  "dependencies": {
+    "express": "latest",
+    "body-parser": "^1.10.0",
+    "hbs": "^2.7.0",
+    "underscore": "^1.7.0"
+  }
+}
