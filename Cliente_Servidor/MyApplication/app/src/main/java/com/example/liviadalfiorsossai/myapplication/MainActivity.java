@@ -69,7 +69,7 @@ public int NUM_PARES = 6;
 
 
 
-/*     Não será mais necessário
+/*     Não será mais necessário (A FUNÇÃO DE SELEC. DIFICULDADE SERÁ REMOVIDA DO JOGO)
         button2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 PopupMenu popup = new PopupMenu(MainActivity.this, button2); // Popup que exibe os níveis do jogo e é acionado por botão 2
@@ -124,24 +124,29 @@ public int NUM_PARES = 6;
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair("num_pares", Integer.toString(NUM_PARES)));
 
-                RequestTask req = new RequestTask(params, new RequestTask.AsyncResponse() {
+                // Montagem do corpo da requisição
+                JSONObject jsonObj = new JSONObject();
+                try {
+
+                    jsonObj.put("FUNCAO", "embaralharPecas");
+                    jsonObj.put("num_pares", Integer.toString(NUM_PARES));
+                }catch (JSONException e){e.printStackTrace();}
+
+                RequestTask req = new RequestTask(jsonObj, new RequestTask.AsyncResponse() {
                     // Callback da chamada assíncrona
                     @Override
-                    public void processFinish(String result) {
+                        public void processFinish(JSONObject result) {
+
+                        // Calback da chamada de embaralhar
                         try {
-                            JSONObject jsonObj = new JSONObject(result);
-                            JSONArray pos = jsonObj.getJSONArray("pos");
+                            JSONArray pos = result.getJSONArray("pos");
                             int pecas [] = new int[pos.length()];
 
 
                             for(int i = 0; i < pos.length(); i++){
                                 pecas[i] = pos.getInt(i);
                             }
-
-                            //System.out.println(pecas[0]);
 
 
                             pec.re_inicializa(NUM_PARES);
@@ -168,11 +173,7 @@ public int NUM_PARES = 6;
                     }
                 });
 
-                req.execute("http://192.168.0.15:3000/embaralha");
-
-
-
-
+                   req.execute();
 
 
 

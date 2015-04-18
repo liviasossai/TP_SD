@@ -1,6 +1,7 @@
 package com.example.liviadalfiorsossai.myapplication;
 
 import android.os.AsyncTask;
+import android.os.Message;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -29,64 +30,46 @@ import java.util.List;
  * Created by liviadalfiorsossai on 4/6/15.
  */
 
-    class RequestTask extends AsyncTask<String, String, String> {
+    class RequestTask extends AsyncTask<String, Void, JSONObject> {
 
-    public AsyncResponse delegate = null;//Call back interface
 
-    List<NameValuePair> params; // Corpo da requisição
+    public AsyncResponse delegate = null; //Call back interface
+    JSONObject jsonObj = new JSONObject();
 
-    public RequestTask( List<NameValuePair> params, AsyncResponse asyncResponse) {
+    public RequestTask(JSONObject jsonObj, AsyncResponse asyncResponse) {
         delegate = asyncResponse; // Cadastro de callback
-        this.params = params;
+        this.jsonObj = jsonObj;   // Corpo da requisição encapsulado em JSON
     }
 
-        @Override
-        protected String doInBackground(String... uri) {
-            HttpClient httpclient = new DefaultHttpClient();
-            HttpResponse response;
-            String responseString = null;
-            HttpPost httpP = new HttpPost(uri[0]);
-
-            if(params != null) { // Corpo de requisição é opcional
-                try {
-                    httpP.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    // writing error to Log
-                    e.printStackTrace();
-                }
-            }
+    @Override
+    protected JSONObject doInBackground(String... urls) {
 
 
-            try {
-                response = httpclient.execute(httpP);
+        try {
 
-                StatusLine statusLine = response.getStatusLine();
-                if(statusLine.getStatusCode() == HttpStatus.SC_OK){
-                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    response.getEntity().writeTo(out);
-                    responseString = out.toString();
-                    out.close();
-                } else{
-                    //Closes the connection.
-                    response.getEntity().getContent().close();
-                    throw new IOException(statusLine.getReasonPhrase());
-                }
-            } catch (ClientProtocolException e) {
-                //TODO Handle problems..
-            } catch (IOException e) {
-                //TODO Handle problems..
-            }
-            return responseString;
-        }
+            long startTime = System.nanoTime();
+            JSONObject jsonreturned =  RPC.downloadUrl(jsonObj);
+            //estimatedTime = System.nanoTime() - startTime;
+            return jsonreturned;
 
-        @Override
-        protected void onPostExecute(String result) {
-            delegate.processFinish(result);
-        }
+        } catch (IOException e) {
+            System.out.println("Problema na entrada de dados.");
+        }/*catch (JSONException e) {
+            System.out.println("Problema na montagem de parametros de requisicao.");
+        }*/
+        return null;
+    }
+
+    @Override
+    protected void onPostExecute(JSONObject result) {
+        delegate.processFinish(result);
+
+    }
 
     public interface AsyncResponse {
 
-        void processFinish(String output);
+        void processFinish(JSONObject output);
     }
+
     }
 
