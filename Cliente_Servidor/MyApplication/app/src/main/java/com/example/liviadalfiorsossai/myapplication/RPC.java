@@ -23,7 +23,7 @@ import java.net.URL;
 public class RPC {
 
     private static final String DEBUG_TAG = "HttpExample";
-    private static String myurl = "http://192.168.1.110:3000";//Add endereco da URL
+    //private static String myurl = "http://192.168.1.110:3000";//Add endereco da URL
     // Given a URL, establishes an HttpUrlConnection and retrieves
 // the web page content as a InputStream, which it returns as
 // a string.
@@ -31,6 +31,7 @@ public class RPC {
         InputStream is = null;
 
         try {
+            String myurl = ServerThread.getUrlConnection();
             URL url = new URL(myurl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setDoInput(true);
