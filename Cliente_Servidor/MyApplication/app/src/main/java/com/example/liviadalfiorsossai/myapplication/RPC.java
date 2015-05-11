@@ -5,6 +5,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,7 +32,7 @@ public class RPC {
         InputStream is = null;
 
         try {
-            String myurl = ServerThread.getUrlConnection();
+            String myurl = getServerURLToConnect();
             URL url = new URL(myurl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setDoInput(true);
@@ -91,5 +92,61 @@ public class RPC {
         {
             return false;
         }
+    }
+
+    private static String getServerURLToConnect() throws IOException {
+        InputStream is = null;
+
+        try {
+            String myurl = "http://192.168.25.16:7001";
+            URL url = new URL(myurl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setInstanceFollowRedirects(false);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type","application/json");
+            conn.setRequestProperty("Host", "android.schoolportal.gr");
+            conn.setUseCaches (false);
+            //conn.setRequestProperty("Texto",textViewToSend.getText().toString());
+            conn.setReadTimeout(10000 /* milliseconds */);
+            conn.setConnectTimeout(15000 /* milliseconds */);
+
+
+            //Building Json parameter as Buffer
+            //BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            //out.write(jsonObj.toString());
+            //out.close();
+            // Starts the query
+            conn.connect();
+
+            String contentResultAsString = null;
+            int HttpResult = conn.getResponseCode();
+            Log.d(DEBUG_TAG, "The response is: " + HttpResult);
+            StringBuilder sb = new StringBuilder();
+            if(HttpResult ==HttpURLConnection.HTTP_OK) {
+                is = conn.getInputStream();
+                String line;
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+                // Convert the InputStream into a JSONObject
+                JSONObject jobject =  new JSONObject(sb.toString());
+                JSONArray ip = jobject.getJSONArray("IP");
+                JSONArray porta = jobject.getJSONArray("PORTA");
+                return "http://" + ip.getString(0)+ ":" + porta.getString(0);
+            }
+            return null;
+
+        } catch (JSONException e) {
+            System.out.printf("Problema na criacao do JSON");
+            e.printStackTrace();
+        } finally {  // Makes sure that the InputStream is closed after the app is finished using it.
+            if (is != null) {
+                is.close();
+            }
+        }
+        return null;
     }
 }

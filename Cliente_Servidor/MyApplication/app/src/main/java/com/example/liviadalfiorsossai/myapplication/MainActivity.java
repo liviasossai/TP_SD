@@ -55,8 +55,8 @@ public int NUM_PARES = 6;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //Inicia a thread na qual o cliente escuta uma porta esperando a eleição do servidor líder
-        Thread fst = new Thread(new ServerThread());
-        fst.start();
+        //Thread fst = new Thread(new ServerThread());
+        //fst.start();
 
         //Elementos de tela
         final TextView textview = (TextView) findViewById(R.id.textView);
