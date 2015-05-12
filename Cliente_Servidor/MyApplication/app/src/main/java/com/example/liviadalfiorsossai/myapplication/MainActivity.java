@@ -1,9 +1,12 @@
 package com.example.liviadalfiorsossai.myapplication;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
+import android.os.StrictMode;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -27,6 +30,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,6 +132,24 @@ public int NUM_PARES = 6;
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
+
+                try {
+                    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                    StrictMode.setThreadPolicy(policy);
+                    AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
+                    alert.setMessage("O servidor Identificador retornou o IP e porta do servidor do jogo: "+RPC.geturl());
+                    alert.setTitle("IP e Porta Server Jogo");
+                    /*alert.setButton(1,"OK", new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int which) {
+                            //alert.cancel();
+
+                        }
+                    });*/
+                    alert.show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 // Montagem do corpo da requisição
                 JSONObject jsonObj = new JSONObject();
@@ -286,6 +308,7 @@ public int NUM_PARES = 6;
 
         return super.onOptionsItemSelected(item);
     }
+
 
 
 }

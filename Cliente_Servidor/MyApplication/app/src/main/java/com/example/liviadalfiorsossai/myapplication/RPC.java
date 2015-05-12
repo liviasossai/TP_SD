@@ -28,6 +28,9 @@ public class RPC {
     // Given a URL, establishes an HttpUrlConnection and retrieves
 // the web page content as a InputStream, which it returns as
 // a string.
+    public static String geturl() throws IOException {
+        return getServerURLToConnect();
+    }
     public static JSONObject downloadUrl(JSONObject jsonObj) throws IOException {
         InputStream is = null;
 
@@ -98,7 +101,7 @@ public class RPC {
         InputStream is = null;
 
         try {
-            String myurl = "http://192.168.25.16:7001";
+            String myurl = "http://192.168.25.16:7000";
             URL url = new URL(myurl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setDoInput(true);
@@ -109,14 +112,14 @@ public class RPC {
             conn.setRequestProperty("Host", "android.schoolportal.gr");
             conn.setUseCaches (false);
             //conn.setRequestProperty("Texto",textViewToSend.getText().toString());
-            conn.setReadTimeout(10000 /* milliseconds */);
-            conn.setConnectTimeout(15000 /* milliseconds */);
-
-
+            //conn.setReadTimeout(10000 /* milliseconds */);
+            //conn.setConnectTimeout(15000 /* milliseconds */);
+            JSONObject jsonObj = new JSONObject();
+            jsonObj.put("FUNCAO", "consulta");
             //Building Json parameter as Buffer
-            //BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-            //out.write(jsonObj.toString());
-            //out.close();
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            out.write(jsonObj.toString());
+            out.close();
             // Starts the query
             conn.connect();
 
@@ -133,9 +136,9 @@ public class RPC {
                 }
                 // Convert the InputStream into a JSONObject
                 JSONObject jobject =  new JSONObject(sb.toString());
-                JSONArray ip = jobject.getJSONArray("IP");
-                JSONArray porta = jobject.getJSONArray("PORTA");
-                return "http://" + ip.getString(0)+ ":" + porta.getString(0);
+                String ip = (String) jobject.get("ip");
+                String porta = (String) jobject.get("port");
+                return "http://" + ip+ ":" + porta;
             }
             return null;
 
