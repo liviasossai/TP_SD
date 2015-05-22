@@ -59,7 +59,7 @@ app.use(function (err, req, res, next) {
 
 /****************** Sockets *********************/
 
-var INIC_ELEICAO = false; // Variavel utilizada para testes -> indica, manualmente, qual no' ira iniciar a eleicao
+var INIC_ELEICAO; // Variavel utilizada para testes -> indica, manualmente, qual no' ira iniciar a eleicao
 
 var id = 3;
 var id_forward = 3;
@@ -74,6 +74,14 @@ console.log('---------------------------------------');
 //Socket servidor
 io_server.on('connection', function (socket) {
     console.log('a user connected');
+
+    socket.on('inic_eleicao',function(port_received){
+      if(port_received == true){
+        io_client.emit('election', id_forward);
+        console.log('Servidor 3 iniciou a eleicao');
+        console.log('Servidor 3 enviou id = ' + id_forward + ' para o servidor de numero 4');
+      }
+    });
 
     socket.on('election', function (id_received) {
         if (id == id_received) {
@@ -119,16 +127,11 @@ io_client.on('connect', function () {
     console.log("socket connected with server 6001");
 });
 
-io_client.on('election', function (msg) {
-    console.log(msg);
-});
-
-
 
 //Servidor 1 sempre comeca a eleicao
 //setTimeout executa uma vez depois de um tempo (em milisegundos)
 //setInterval executa a funcao em intervalos de tempo definidos (em milisegundos)
-if(INIC_ELEICAO){
+/*if(INIC_ELEICAO){
 setTimeout(function () {
     io_client.emit('election', id_forward);
     console.log('Servidor 3 iniciou a eleicao');
@@ -141,5 +144,6 @@ setInterval(function () {
     console.log('Servidor 1 enviou id = ' + id_forward + ' para o servidor de numero 2');
 }, 60000);
 
-}
+}*/
+
 module.exports = app;

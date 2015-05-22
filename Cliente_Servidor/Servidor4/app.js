@@ -74,6 +74,14 @@ console.log('---------------------------------------');
 io_server.on('connection', function (socket) {
     console.log('a user connected');
 
+    socket.on('inic_eleicao',function(port_received){
+      if(port_received == true){
+        io_client.emit('election', id_forward);
+        console.log('Servidor 4 iniciou a eleicao');
+        console.log('Servidor 4 enviou id = ' + id_forward + ' para o servidor de numero 1');
+      }
+    });
+
     socket.on('election', function (id_received) {
         if (id == id_received) {
             elected = id;
@@ -118,14 +126,11 @@ io_client.on('connect', function () {
     console.log("socket connected with server 3001");
 });
 
-io_client.on('election', function (msg) {
-    console.log(msg);
-});
 
 //Servidor 1 sempre comeca a eleicao
 //setTimeout executa uma vez depois de um tempo (em milisegundos)
 //setInterval executa a funcao em intervalos de tempo definidos (em milisegundos)
-if(INIC_ELEICAO){
+/*if(INIC_ELEICAO){
 setTimeout(function () {
     io_client.emit('election', id_forward);
     console.log('Servidor 4 iniciou a eleicao');
@@ -138,7 +143,7 @@ setInterval(function () {
     console.log('Servidor 1 enviou id = ' + id_forward + ' para o servidor de numero 2');
 }, 60000);
 
-}
+}*/
 /********************************************/
 
 module.exports = app;
