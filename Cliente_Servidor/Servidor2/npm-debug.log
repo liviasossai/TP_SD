@@ -17,7 +17,7 @@
 10 verbose stack     at maybeClose (child_process.js:756:16)
 10 verbose stack     at Process.ChildProcess._handle.onexit (child_process.js:823:5)
 11 verbose pkgid Memoria_server@0.0.2
-12 verbose cwd /Users/liviadalfiorsossai/Desktop/Servidores_Late_09_05_15/Servidor2
+12 verbose cwd /Users/liviadalfiorsossai/Desktop/TP_SD-master/Cliente_Servidor/Servidor2
 13 error Darwin 14.3.0
 14 error argv "node" "/usr/local/bin/npm" "start"
 15 error node v0.10.33
