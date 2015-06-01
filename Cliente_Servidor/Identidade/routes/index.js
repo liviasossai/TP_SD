@@ -6,6 +6,19 @@ var router = express.Router();
 var http = require('http').Server(express).listen(7001);
 var io_server = require('socket.io')(http);
 
+
+/******************* Somente para teste gustavo**********************
+var io_client = require('socket.io-client')('http://localhost:3001');
+io_client.on('connect', function() {
+  console.log("socket conectado ao servidor 1 para iniciar eleicao");
+  io_client.emit('inic_eleicao', true);
+  setTimeout(function() {
+    io_client.disconnect();
+    }, 500);
+});
+/*********************************************************************/
+
+
 //************Inicio Jogo***********//
 var NUM_PARES;
 var NUM_IMAGENS = 15;

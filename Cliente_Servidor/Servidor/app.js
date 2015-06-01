@@ -7,11 +7,54 @@ var users = require('./routes/users');
 //Socket servidor
 var http = require('http').Server(express).listen(3001);
 var io_server = require('socket.io')(http);
-//Socket cliente
-var io_client = require('socket.io-client')('http://localhost:4001');
+
+
+var app = express();
+
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
+
+app.use('/', routes);
+app.use('/users', users);
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
+});
+
+// error handlers
+
+// development error handler
+// will print stacktrace
+if (app.get('env') === 'development') {
+    app.use(function(err, req, res, next) {
+        res.status(err.status || 500);
+        res.render('error', {
+            message: err.message,
+            error: err
+        });
+    });
+}
+
+// production error handler
+// no stacktraces leaked to user
+app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+        message: err.message,
+        error: {}
+    });
+});
+
 
 
 // ------- Variaveis empregadas no gossip --------------
+
 
 var http2 = require('http').Server(express).listen(3003); // Porta da qual recebera a tabela de alguem
 var recebe_tab_gossip = require('socket.io')(http2);
@@ -61,7 +104,8 @@ setInterval(function() {
       if (tempo_local - tab_gossip_tempo_local[servidores_possiveis[i]] > tempo_max_atualizacao) {
         console.log('Detectada falha no servidor ' + servidores_possiveis[i]);
         tab_gossip_tempo_local[servidores_possiveis[i]] = undefined; // "Exclui registro"
-        /* *** Comunicar para o servidor identidade que o servidor falhou *** */
+
+
         var io_client2 = require('socket.io-client')('http://localhost:7001');
         io_client2.emit('failed', servidores_possiveis[i]);
         setTimeout(function() {
@@ -106,58 +150,62 @@ function merge(tab_fora, serv_possiveis, t_local) {
 
 }
 
+
+
 /* ---------------------------------------- Fim - Gossip ----------------------------------------- */
 
-var app = express();
-
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
-
-app.use('/', routes);
-app.use('/users', users);
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
-});
-
-// error handlers
-
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err
-    });
-  });
-}
-
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
-});
 
 
-/****************** Sockets *********************/
+/*---------------------------------------- Eleicao ----------------------------------------*/
 
 var INIC_ELEICAO; // Variavel utilizada para testes -> indica, manualmente, qual no' ira iniciar a eleicao
 
 var id = 1;
 var id_forward = 1;
 var elected = null;
+var io_client = require('socket.io-client');
+var server_index = 0;
+var server_ports = [4001, 5001, 6001];
+
+//Socket cliente
+function Connect_servers(callback) {
+    server_index = 0;
+    io_client = require('socket.io-client')('http://localhost:' + server_ports[server_index]);
+
+    io_client.on('connect', function() {
+        console.log("socket connected with server " + server_ports[server_index]);
+        callback();
+    });
+
+    io_client.on('connect_error', function() {
+        console.log("socket not connected with server " + server_ports[server_index]);
+        io_client.disconnect();
+        next_server(callback);
+    });
+
+}
+
+
+function next_server(callback) {
+    server_index = server_index + 1;
+    if (server_index < 3) {
+        io_client = require('socket.io-client')('http://localhost:' + server_ports[server_index]);
+        io_client.on('connect', function() {
+            console.log("socket connected with server " + server_ports[server_index]);
+            callback();
+        });
+
+        io_client.on('connect_error', function() {
+            console.log("socket not connected with server " + server_ports[server_index]);
+            io_client.disconnect();
+            next_server(callback);
+        });
+    } else {
+        console.log('Nenhum server ativo, impossivel conectar!');
+    }
+
+}
+
 
 
 console.log('---------------------------------------');
@@ -165,94 +213,87 @@ console.log('    Eu sou o servidor de numero 1      ');
 console.log('    MEU ID EH ' + id);
 console.log('---------------------------------------');
 
+
+
+
 //Socket servidor
 io_server.on('connection', function(socket) {
-  console.log('a user connected');
+    console.log('a user connected');
 
-  socket.on('inic_eleicao', function(port_received) {
-    if (port_received == true) {
-      io_client.emit('election', id_forward);
-      console.log('Servidor 1 iniciou a eleicao');
-      console.log('Servidor 1 enviou id = ' + id_forward + ' para o servidor de numero 2');
-    }
-  });
+    socket.on('inic_eleicao', function(port_received) {
+        if (port_received == true) {
+            Connect_servers(init_elect);
 
-  socket.on('election', function(id_received) {
-    if (id == id_received) {
-      elected = id;
-      io_client.emit('id_elected', elected);
-      console.log('Servidor 1 comecou o elected');
-    } else {
-      if (id > id_received) {
-        id_forward = id;
-      } else {
-        if (id < id_received) {
-          id_forward = id_received;
+            function init_elect() {
+                id_forward = id;
+                io_client.emit('election', id_forward);
+                console.log('Servidor 1 iniciou a eleicao');
+                console.log('Servidor 1 enviou id = ' + id_forward + ' para o servidor ' + server_ports[server_index]);
+            }
         }
-      }
-      io_client.emit('election', id_forward);
+    });
 
-    }
+    socket.on('election', function(id_received) {
+        if (io_client == null) {
+            Connect_servers(elect);
+        } else {
+            elect();
+        }
 
-    console.log('Servidor 1 recebeu id = ' + id_received + ' do servidor de numero 4');
-    console.log('Servidor 1 enviou id = ' + id_forward + ' para o servidor de numero 2');
+        function elect() {
 
-  });
+            console.log('Servidor 1 recebeu id = ' + id_received);
+            if (id == id_received) {
+                elected = id;
+                io_client.emit('id_elected', elected);
+                console.log('Servidor 1 comecou o elected');
+            } else {
+                if (id > id_received) {
+                    id_forward = id;
+                } else {
+                    if (id < id_received) {
+                        id_forward = id_received;
+                    }
+                }
+                io_client.emit('election', id_forward);
+                console.log('Servidor 1 enviou id = ' + id_forward + ' para o servidor '+ server_ports[server_index]);
+            }
+        }
+
+    });
 
 
-  socket.on('id_elected', function(id_elected) {
-    if (id == id_elected) {
-      console.log('Eu sou o lider');
-      var io_client2 = require('socket.io-client')('http://localhost:7001');
-      io_client2.emit('elected', 'localhost', '3000');
-      setTimeout(function() {
-        io_client2.disconnect();
-      }, 1000);
-    } else {
-      elected = id_elected;
-      io_client.emit('id_elected', elected);
-      console.log('Enviado elected = ' + elected);
-    }
-  });
+    socket.on('id_elected', function(id_elected) {
+        if (id == id_elected) {
+            console.log('Eu sou o lider');
+            var io_client2 = require('socket.io-client')('http://localhost:7001');
+            io_client2.emit('elected', 'localhost', '3000');
+            setTimeout(function() {
+                io_client2.disconnect();
+            }, 1000);
+        } else {
+            elected = id_elected;
+            io_client.emit('id_elected', elected);
+            console.log('Enviado elected = ' + elected);
+        }
 
-  socket.on('disconnect', function() {
-    console.log('user disconnected');
-  });
+    });
+
+    socket.on('disconnect', function() {
+        console.log('user disconnected');
+    });
 });
 
 
-//Socket cliente
-io_client.on('connect', function() {
-  console.log("socket connected with server 4001");
-});
 
 
 
-
-//Servidor 1 sempre comeca a eleicao
-//setTimeout executa uma vez depois de um tempo (em milisegundos)
-//setInterval executa a funcao em intervalos de tempo definidos (em milisegundos)
-/*if(INIC_ELEICAO){
-setTimeout(function () {
-    io_client.emit('election', id_forward);
-    console.log('Servidor 1 iniciou a eleicao');
-    console.log('Servidor 1 enviou id = ' + id_forward + ' para o servidor de numero 2');
-}, 10000);
-
-setInterval(function () {
-    io_client.emit('election', id_forward);
-    console.log('Servidor 1 iniciou a eleicao');
-    console.log('Servidor 1 enviou id = ' + id_forward + ' para o servidor de numero 2');
-}, 60000);
-
-}*/
-//io_client2.on('connect', function () { console.log("socket connected with server 7001"); });
-/************************************************/
+/*---------------------------------------- Fim - Eleicao ----------------------------------------*/
 
 
 function shuffle(o) {
-  for (var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
-  return o;
+    for (var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+    return o;
 }
 
 module.exports = app;
