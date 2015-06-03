@@ -36,21 +36,21 @@ import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity {
-public int jogada = 0;
-public int peca_virada1;
-public int peca_virada2;
-public int peca_virada1_pos=-1;
-public int peca_virada2_pos=-1;
-public int pares_virados = 0;
+    public int jogada = 0;
+    public int peca_virada1;
+    public int peca_virada2;
+    public int peca_virada1_pos = -1;
+    public int peca_virada2_pos = -1;
+    public int pares_virados = 0;
 
-public int NUM_PARES = 6;
+    public int NUM_PARES = 6;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         // Será usado futuramente, para fazer animações
-       // ImageView anim = (ImageView) findViewById(R.id.animacao);
-       // anim.setBackgroundResource(R.drawable.animacao);
+        // ImageView anim = (ImageView) findViewById(R.id.animacao);
+        // anim.setBackgroundResource(R.drawable.animacao);
 
         //AnimationDrawable animation = (AnimationDrawable) anim.getBackground();
         //animation.start();
@@ -132,76 +132,85 @@ public int NUM_PARES = 6;
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
+                AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
 
                 try {
                     StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                     StrictMode.setThreadPolicy(policy);
-                    AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
-                    alert.setMessage("O servidor Identificador retornou o IP e porta do servidor do jogo: "+RPC.geturl());
+
+                    String url = RPC.geturl();
+                    alert.setMessage("O servidor Identificador retornou o IP e porta do servidor do jogo: " + url);
                     alert.setTitle("IP e Porta Server Jogo");
-                    /*alert.setButton(1,"OK", new DialogInterface.OnClickListener() {
-
-                        public void onClick(DialogInterface dialog, int which) {
-                            //alert.cancel();
-
-                        }
-                    });*/
                     alert.show();
+
+
+                    // Montagem do corpo da requisição
+                    JSONObject jsonObj = new JSONObject();
+                    try {
+
+                        jsonObj.put("FUNCAO", "embaralharPecas");
+                        jsonObj.put("num_pares", Integer.toString(NUM_PARES));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    RequestTask req = new RequestTask(jsonObj, new RequestTask.AsyncResponse() {
+                        AlertDialog alertServerUnavailable = new AlertDialog.Builder(MainActivity.this).create();
+                        // Callback da chamada assíncrona
+                        @Override
+                        public void processFinish(JSONObject result, boolean response_is_OK) {
+                            // Calback da chamada de embaralhar
+                            if(response_is_OK){
+                                try {
+                                    JSONArray pos = result.getJSONArray("pos");
+                                    int pecas[] = new int[pos.length()];
+
+
+                                    for (int i = 0; i < pos.length(); i++) {
+                                        pecas[i] = pos.getInt(i);
+                                    }
+
+
+                                    pec.re_inicializa(NUM_PARES);
+                                    pec.imagensRandomicas(pecas);
+
+                                    jogada = 0;
+                                    peca_virada1_pos = -1;
+                                    peca_virada2_pos = -1;
+                                    pares_virados = 0;
+
+                                    textview.setTextColor(Color.rgb(0, 0, 0));
+                                    textview.setTextSize(16);
+                                    textview.setBackgroundColor(Color.rgb(255, 255, 255));
+                                    textview.setText("  Total Pairs Flipped: 0");
+                                    textview.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
+
+                                    ImgAdptr.init(NUM_PARES);
+                                    gridview.setAdapter(ImgAdptr);
+
+
+                                } catch (JSONException e) {
+                                    System.out.println("Erro " + e);
+                                }
+                            }
+                            else
+                            {
+                                alertServerUnavailable.setMessage("O servidor do jogo está indisponível, tente novamente.");
+                                alertServerUnavailable.setTitle("Servidor de Jogo indisponível");
+                                alertServerUnavailable.show();
+                            }
+                        }
+                    });
+
+                    req.execute();
+
                 } catch (IOException e) {
                     e.printStackTrace();
+                } catch (ConnException e) {
+                    alert.setMessage(e.getMessage());
+                    alert.setTitle("IP e Porta Server Jogo");
+                    alert.show();
                 }
-
-                // Montagem do corpo da requisição
-                JSONObject jsonObj = new JSONObject();
-                try {
-
-                    jsonObj.put("FUNCAO", "embaralharPecas");
-                    jsonObj.put("num_pares", Integer.toString(NUM_PARES));
-                }catch (JSONException e){e.printStackTrace();}
-
-                RequestTask req = new RequestTask(jsonObj, new RequestTask.AsyncResponse() {
-                    // Callback da chamada assíncrona
-                    @Override
-                        public void processFinish(JSONObject result) {
-
-                        // Calback da chamada de embaralhar
-                        try {
-                            JSONArray pos = result.getJSONArray("pos");
-                            int pecas [] = new int[pos.length()];
-
-
-                            for(int i = 0; i < pos.length(); i++){
-                                pecas[i] = pos.getInt(i);
-                            }
-
-
-                            pec.re_inicializa(NUM_PARES);
-                            pec.imagensRandomicas(pecas);
-
-                            jogada = 0;
-                            peca_virada1_pos=-1;
-                            peca_virada2_pos=-1;
-                            pares_virados = 0;
-
-                            textview.setTextColor(Color.rgb(0, 0, 0));
-                            textview.setTextSize(16);
-                            textview.setBackgroundColor(Color.rgb(255, 255, 255));
-                            textview.setText("  Total Pairs Flipped: 0");
-                            textview.setTypeface(Typeface.DEFAULT,Typeface.NORMAL);
-
-                            ImgAdptr.init(NUM_PARES);
-                            gridview.setAdapter(ImgAdptr);
-
-
-                        }catch(JSONException e){
-                            System.out.println("Erro "+e);
-                        }
-                    }
-                });
-
-                   req.execute();
-
-
 
             }
         });
@@ -218,8 +227,8 @@ public int NUM_PARES = 6;
                     // Estado 1 da jogada
                     if (jogada == 0) {
 
-                        if(pares_virados > 0) {
-                            textview.setText("  Total Pairs Flipped: "+pares_virados);
+                        if (pares_virados > 0) {
+                            textview.setText("  Total Pairs Flipped: " + pares_virados);
                             if ((peca_virada2 == peca_virada1) && peca_virada1_pos != peca_virada2_pos) { // Não permitir que o clique em uma mesma posição conte como par
                                 TJ.getIV_j1().setImageResource(pec.getNull());
                                 TJ.getIV_j2().setImageResource(pec.getNull());
@@ -241,11 +250,11 @@ public int NUM_PARES = 6;
                             }
                         }
 
-                            imageView.setImageResource(pec.getPeca(position));
-                            peca_virada1 = pec.getPeca(position);
-                            peca_virada1_pos = position;
-                            TJ.setIV_j1(imageView);
-                            jogada = 1;
+                        imageView.setImageResource(pec.getPeca(position));
+                        peca_virada1 = pec.getPeca(position);
+                        peca_virada1_pos = position;
+                        TJ.setIV_j1(imageView);
+                        jogada = 1;
 
                     }
                     // Estado 2 da jogada
@@ -257,11 +266,10 @@ public int NUM_PARES = 6;
                                 peca_virada2_pos = position;
                                 TJ.setIV_j2(imageView);
                                 imageView.setImageResource(pec.getPeca(position));
-                                 jogada = 0; // O jogo só retorna ao estado 1 (verificação) se a posição selecionada for diferente da atual
+                                jogada = 0; // O jogo só retorna ao estado 1 (verificação) se a posição selecionada for diferente da atual
 
 
-
-                                if(pec.getPecasDisp() <= 2){ // Se só restam duas peças, isso significa que todos os pares já foram encontrados
+                                if (pec.getPecasDisp() <= 2) { // Se só restam duas peças, isso significa que todos os pares já foram encontrados
                                     pec.setPecaValida(peca_virada1_pos);
                                     pec.setPecaValida(peca_virada2_pos);
 
@@ -270,7 +278,7 @@ public int NUM_PARES = 6;
                                     textview.setBackgroundColor(Color.rgb(255, 255, 0));
 
                                     textview.setTextColor(Color.rgb(255, 0, 255));
-                                    textview.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
+                                    textview.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
 
                                 }
                             }
@@ -308,7 +316,6 @@ public int NUM_PARES = 6;
 
         return super.onOptionsItemSelected(item);
     }
-
 
 
 }

@@ -15,7 +15,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 /**
@@ -28,10 +32,10 @@ public class RPC {
     // Given a URL, establishes an HttpUrlConnection and retrieves
 // the web page content as a InputStream, which it returns as
 // a string.
-    public static String geturl() throws IOException {
+    public static String geturl() throws IOException, ConnException {
         return getServerURLToConnect();
     }
-    public static JSONObject downloadUrl(JSONObject jsonObj) throws IOException {
+    public static JSONObject downloadUrl(JSONObject jsonObj) throws IOException, ConnException {
         InputStream is = null;
 
         try {
@@ -71,17 +75,78 @@ public class RPC {
                 // Convert the InputStream into a JSONObject
                 return (new JSONObject(sb.toString()));
             }
-            return null;
+            else
+            {
+                informFailToIdentityServer();
+                throw new ConnException("Problema no servidor de jogo.");
+            }
 
         } catch (JSONException e) {
             System.out.printf("Problema na criacao do JSON");
             e.printStackTrace();
+        } catch (SocketTimeoutException se) {
+            informFailToIdentityServer();
+            throw new ConnException("Conexão com servidor do jogo demorando mais que o normal. Tente novamente.");
+        }
+        catch (ConnectException se) {
+            informFailToIdentityServer();
+            throw new ConnException("Conexão com servidor do jogo não foi possível. Tente novamente.");
         } finally {  // Makes sure that the InputStream is closed after the app is finished using it.
             if (is != null) {
                 is.close();
             }
         }
         return null;
+    }
+
+    private static void informFailToIdentityServer() throws ConnException {
+        try {
+            String myurl = "http://192.168.25.16:7000";
+            URL url = new URL(myurl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setInstanceFollowRedirects(false);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type","application/json");
+            conn.setRequestProperty("Host", "android.schoolportal.gr");
+            conn.setUseCaches(false);
+            //conn.setRequestProperty("Texto",textViewToSend.getText().toString());
+            //conn.setReadTimeout(10000 /* milliseconds */);
+            //conn.setConnectTimeout(15000 /* milliseconds */);
+            JSONObject jsonObj = new JSONObject();
+            jsonObj.put("FUNCAO", "no_server");
+            //Building Json parameter as Buffer
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            out.write(jsonObj.toString());
+            out.close();
+            // Starts the query
+            conn.connect();
+
+            String contentResultAsString = null;
+            int HttpResult = conn.getResponseCode();
+            Log.d(DEBUG_TAG, "The response is: " + HttpResult);
+            StringBuilder sb = new StringBuilder();
+            if(HttpResult !=HttpURLConnection.HTTP_OK) {
+                throw new ConnException("Servidor identidade não retornou Sucesso.");
+            }
+
+        } catch (JSONException e) {
+            System.out.printf("Problema na criacao do JSON");
+            e.printStackTrace();
+        } catch (SocketTimeoutException se) {
+            throw new ConnException("Conexão com servidor identidade demorando mais que o normal");
+        }
+        catch (ConnectException se) {
+            throw new ConnException("Conexão com servidor identidade não foi possível");
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+        }catch (ConnException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static boolean isNetworkAvailable(Context context) {
@@ -97,9 +162,8 @@ public class RPC {
         }
     }
 
-    private static String getServerURLToConnect() throws IOException {
+    private static String getServerURLToConnect() throws IOException, ConnException {
         InputStream is = null;
-
         try {
             String myurl = "http://192.168.25.16:7000";
             URL url = new URL(myurl);
@@ -110,7 +174,7 @@ public class RPC {
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type","application/json");
             conn.setRequestProperty("Host", "android.schoolportal.gr");
-            conn.setUseCaches (false);
+            conn.setUseCaches(false);
             //conn.setRequestProperty("Texto",textViewToSend.getText().toString());
             //conn.setReadTimeout(10000 /* milliseconds */);
             //conn.setConnectTimeout(15000 /* milliseconds */);
@@ -134,18 +198,33 @@ public class RPC {
                 while ((line = br.readLine()) != null) {
                     sb.append(line);
                 }
-                // Convert the InputStream into a JSONObject
+                // Convert the InputStream into a JSONObject   contentResultAsString = jobject.get("ip")
                 JSONObject jobject =  new JSONObject(sb.toString());
                 String ip = (String) jobject.get("ip");
                 String porta = (String) jobject.get("port");
+
                 return "http://" + ip+ ":" + porta;
             }
-            return null;
-
+            else
+            {
+                throw new ConnException("Servidor identidade não retornou Sucesso.");
+            }
         } catch (JSONException e) {
             System.out.printf("Problema na criacao do JSON");
             e.printStackTrace();
-        } finally {  // Makes sure that the InputStream is closed after the app is finished using it.
+        } catch (SocketTimeoutException se) {
+            informFailToIdentityServer();
+            throw new ConnException("Conexão com servidor identidade demorando mais que o normal");
+        }
+        catch (ConnectException se) {
+            informFailToIdentityServer();
+            throw new ConnException("Conexão com servidor identidade não foi possível");
+        }
+        catch (ClassCastException se) {
+            informFailToIdentityServer();
+            throw new ConnException("Servidor identidade retornou dados do servidor do jogo vazios.");
+        }
+        finally {  // Makes sure that the InputStream is closed after the app is finished using it.
             if (is != null) {
                 is.close();
             }

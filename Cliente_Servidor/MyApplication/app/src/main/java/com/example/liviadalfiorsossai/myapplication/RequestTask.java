@@ -35,7 +35,7 @@ import java.util.List;
 
     public AsyncResponse delegate = null; //Call back interface
     JSONObject jsonObj = new JSONObject();
-
+    public boolean response_is_OK = true;
     public RequestTask(JSONObject jsonObj, AsyncResponse asyncResponse) {
         delegate = asyncResponse; // Cadastro de callback
         this.jsonObj = jsonObj;   // Corpo da requisição encapsulado em JSON
@@ -54,21 +54,22 @@ import java.util.List;
 
         } catch (IOException e) {
             System.out.println("Problema na entrada de dados.");
-        }/*catch (JSONException e) {
-            System.out.println("Problema na montagem de parametros de requisicao.");
-        }*/
+        }catch (ConnException e) {
+            response_is_OK = false;
+            System.out.println("Problema na comunicação com o servidor de jogo.");
+        }
         return null;
     }
 
     @Override
     protected void onPostExecute(JSONObject result) {
-        delegate.processFinish(result);
+        delegate.processFinish(result,response_is_OK);
 
     }
 
     public interface AsyncResponse {
 
-        void processFinish(JSONObject output);
+        void processFinish(JSONObject output, boolean response_is_OK);
     }
 
     }
