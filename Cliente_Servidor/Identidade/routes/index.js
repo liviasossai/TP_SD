@@ -146,14 +146,12 @@ router.post('/', function(req, res) {
                 port: porta
             });
         }
+    } else if (func == 'no_server') { // Servidor lider nao responde
+        Init_election(res_json);
+
+    } else {
+        res.json(undefined);
     }
-
-} else if (func == 'no_server') { // Servidor lider nao responde
-    Init_election(res_json);
-
-} else {
-    res.json(undefined);
-}
 });
 
 function ContarPalavra(str) {
