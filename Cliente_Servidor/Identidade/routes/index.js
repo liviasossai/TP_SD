@@ -177,4 +177,12 @@ function Init_election(callback) {
 }
 
 
+/**************** Teste mostra IP e porta em intervalos*********/
+setInterval(function() {
+    console.log("Porta atual: "+porta);
+}, 10000);
+
+
+/*******************************************/
+
 module.exports = router;
