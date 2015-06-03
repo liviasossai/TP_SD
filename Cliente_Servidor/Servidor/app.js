@@ -163,7 +163,7 @@ var INIC_ELEICAO; // Variavel utilizada para testes -> indica, manualmente, qual
 var id = 1;
 var id_forward = 1;
 var elected = null;
-var io_client = require('socket.io-client');
+var io_client = null;
 var server_index = 0;
 var server_ports = [4001, 5001, 6001];
 
@@ -202,6 +202,7 @@ function next_server(callback) {
         });
     } else {
         console.log('Nenhum server ativo, impossivel conectar!');
+
     }
 
 }
