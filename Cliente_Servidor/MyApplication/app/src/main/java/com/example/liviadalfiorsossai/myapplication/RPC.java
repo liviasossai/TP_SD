@@ -3,6 +3,7 @@ package com.example.liviadalfiorsossai.myapplication;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -11,16 +12,19 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ConnectException;
+import java.net.DatagramSocket;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.sql.Connection;
 
 /**
  * Created by Lucas on 16/04/2015.
@@ -28,6 +32,7 @@ import java.net.URL;
 public class RPC {
 
     private static final String DEBUG_TAG = "HttpExample";
+    //private static HttpURLConnection conn = null;
     //private static String myurl = "http://192.168.1.110:3000";//Add endereco da URL
     // Given a URL, establishes an HttpUrlConnection and retrieves
 // the web page content as a InputStream, which it returns as
@@ -37,12 +42,13 @@ public class RPC {
     }
     public static JSONObject downloadUrl(JSONObject jsonObj) throws IOException, ConnException {
         InputStream is = null;
-
+        HttpURLConnection conn = null;
+        System.setProperty("http.keepAlive", "false"); // must be set
         try {
             String myurl = getServerURLToConnect();
             URL url = new URL(myurl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setDoInput(true);
+            conn = (HttpURLConnection) url.openConnection();
+            //conn.setDoInput(true);
             conn.setDoOutput(true);
             conn.setInstanceFollowRedirects(false);
             conn.setRequestMethod("POST");
@@ -104,7 +110,7 @@ public class RPC {
             String myurl = "http://192.168.25.16:7000";
             URL url = new URL(myurl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setDoInput(true);
+            //conn.setDoInput(true);
             conn.setDoOutput(true);
             conn.setInstanceFollowRedirects(false);
             conn.setRequestMethod("POST");
@@ -164,15 +170,19 @@ public class RPC {
 
     private static String getServerURLToConnect() throws IOException, ConnException {
         InputStream is = null;
+        HttpURLConnection conn = null;
+        System.setProperty("http.keepAlive", "false"); // must be set
         try {
-            String myurl = "http://192.168.25.16:7000";
+            String myurl = "http://192.168.12.6:7000";
             URL url = new URL(myurl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setDoInput(true);
+            //System.setProperty("http.keepAlive", "false");
+            conn = (HttpURLConnection) url.openConnection();
+            final String charset = "UTF-8";
+            //conn.setDoInput(true);
             conn.setDoOutput(true);
-            conn.setInstanceFollowRedirects(false);
+            //conn.setInstanceFollowRedirects(false);
             conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type","application/json");
+            conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Host", "android.schoolportal.gr");
             conn.setUseCaches(false);
             //conn.setRequestProperty("Texto",textViewToSend.getText().toString());
@@ -185,8 +195,8 @@ public class RPC {
             out.write(jsonObj.toString());
             out.close();
             // Starts the query
-            conn.connect();
-
+            //conn.connect();
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             String contentResultAsString = null;
             int HttpResult = conn.getResponseCode();
             Log.d(DEBUG_TAG, "The response is: " + HttpResult);
@@ -213,18 +223,27 @@ public class RPC {
             System.out.printf("Problema na criacao do JSON");
             e.printStackTrace();
         } catch (SocketTimeoutException se) {
-            informFailToIdentityServer();
+            //informFailToIdentityServer();
             throw new ConnException("Conexão com servidor identidade demorando mais que o normal");
         }
         catch (ConnectException se) {
-            informFailToIdentityServer();
+            //informFailToIdentityServer();
             throw new ConnException("Conexão com servidor identidade não foi possível");
         }
         catch (ClassCastException se) {
-            informFailToIdentityServer();
+            //informFailToIdentityServer();
             throw new ConnException("Servidor identidade retornou dados do servidor do jogo vazios.");
         }
+        catch (EOFException eo)
+        {
+            throw new ConnException("Conexão com servidor identidade não foi possível");
+        }
+        catch (Exception eo)
+        {
+            throw new ConnException("Conexão com servidor identidade não foi possível");
+        }
         finally {  // Makes sure that the InputStream is closed after the app is finished using it.
+            //conn.disconnect();
             if (is != null) {
                 is.close();
             }
