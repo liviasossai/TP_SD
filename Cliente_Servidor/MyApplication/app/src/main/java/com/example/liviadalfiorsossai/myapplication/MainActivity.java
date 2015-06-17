@@ -73,144 +73,82 @@ public class MainActivity extends ActionBarActivity {
 
         final ImageAdapter ImgAdptr = new ImageAdapter(this);
 
-        final Button button2 = (Button) findViewById(R.id.button2); // Botão que ativa a exibição dos níveis do jogo
 
-
-
-/*     Não será mais necessário (A FUNÇÃO DE SELEC. DIFICULDADE SERÁ REMOVIDA DO JOGO)
-        button2.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                PopupMenu popup = new PopupMenu(MainActivity.this, button2); // Popup que exibe os níveis do jogo e é acionado por botão 2
-                popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
-
-                // Cadastrar callback dos itens da lista da popup
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    public boolean onMenuItemClick(MenuItem item) {
-                        if(item.getTitle().equals("Small Board (3x4)")){
-                            NUM_PARES = 6;
-
-                        }
-                        else if(item.getTitle().equals("Medium Board (5x4)")){
-                            NUM_PARES = 10;
-
-
-                        }
-                        else if(item.getTitle().equals("Big Board (7x4)")){
-                            NUM_PARES = 14;
-
-                         }
-                        else if(item.getTitle().equals("Teste (2x4)")){
-                            NUM_PARES = 4;
-
-                       }
-                        pec.re_inicializa(NUM_PARES);
-
-                        jogada = 0;
-                        peca_virada1_pos=-1;
-                        peca_virada2_pos=-1;
-                        pares_virados = 0;
-
-                        textview.setTextColor(Color.rgb(0, 0, 0));
-                        textview.setTextSize(16);
-                        textview.setBackgroundColor(Color.rgb(255, 255, 255));
-                        textview.setText("  Total Pairs Flipped: 0");
-                        textview.setTypeface(Typeface.DEFAULT,Typeface.NORMAL);
-
-                        ImgAdptr.init(NUM_PARES);
-                        gridview.setAdapter(ImgAdptr);
-
-                        return true;
-                    }
-                });
-
-                popup.show(); // Mostrar menu
-            }
-        });
-*/
 
         final Button button = (Button) findViewById(R.id.button); // Iniciar novo jogo
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
-                AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
+                //AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
 
+                //StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                //StrictMode.setThreadPolicy(policy);
+
+                //String url = RPC.geturl();
+                //alert.setMessage("O servidor Identificador retornou o IP e porta do servidor do jogo: " + url);
+                // alert.setTitle("IP e Porta Server Jogo");
+                //alert.show();
+
+
+                // Montagem do corpo da requisição
+                JSONObject jsonObj = new JSONObject();
                 try {
-                    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                    StrictMode.setThreadPolicy(policy);
 
-                    String url = RPC.geturl();
-                    alert.setMessage("O servidor Identificador retornou o IP e porta do servidor do jogo: " + url);
-                    alert.setTitle("IP e Porta Server Jogo");
-                    alert.show();
+                    jsonObj.put("FUNCAO", "embaralharPecas");
+                    jsonObj.put("num_pares", Integer.toString(NUM_PARES));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
-
-                    // Montagem do corpo da requisição
-                    JSONObject jsonObj = new JSONObject();
-                    try {
-
-                        jsonObj.put("FUNCAO", "embaralharPecas");
-                        jsonObj.put("num_pares", Integer.toString(NUM_PARES));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                    RequestTask req = new RequestTask(jsonObj, new RequestTask.AsyncResponse() {
-                        AlertDialog alertServerUnavailable = new AlertDialog.Builder(MainActivity.this).create();
-                        // Callback da chamada assíncrona
-                        @Override
-                        public void processFinish(JSONObject result, boolean response_is_OK) {
-                            // Calback da chamada de embaralhar
-                            if(response_is_OK){
-                                try {
-                                    JSONArray pos = result.getJSONArray("pos");
-                                    int pecas[] = new int[pos.length()];
+                RequestTask req = new RequestTask(jsonObj, new RequestTask.AsyncResponse() {
+                    AlertDialog alertServerUnavailable = new AlertDialog.Builder(MainActivity.this).create();
+                    // Callback da chamada assíncrona
+                    @Override
+                    public void processFinish(JSONObject result, boolean response_is_OK) {
+                        // Calback da chamada de embaralhar
+                        if(response_is_OK){
+                            try {
+                                JSONArray pos = result.getJSONArray("pos");
+                                int pecas[] = new int[pos.length()];
 
 
-                                    for (int i = 0; i < pos.length(); i++) {
-                                        pecas[i] = pos.getInt(i);
-                                    }
-
-
-                                    pec.re_inicializa(NUM_PARES);
-                                    pec.imagensRandomicas(pecas);
-
-                                    jogada = 0;
-                                    peca_virada1_pos = -1;
-                                    peca_virada2_pos = -1;
-                                    pares_virados = 0;
-
-                                    textview.setTextColor(Color.rgb(0, 0, 0));
-                                    textview.setTextSize(16);
-                                    textview.setBackgroundColor(Color.rgb(255, 255, 255));
-                                    textview.setText("  Total Pairs Flipped: 0");
-                                    textview.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
-
-                                    ImgAdptr.init(NUM_PARES);
-                                    gridview.setAdapter(ImgAdptr);
-
-
-                                } catch (JSONException e) {
-                                    System.out.println("Erro " + e);
+                                for (int i = 0; i < pos.length(); i++) {
+                                    pecas[i] = pos.getInt(i);
                                 }
-                            }
-                            else
-                            {
-                                alertServerUnavailable.setMessage("O servidor do jogo está indisponível, tente novamente.");
-                                alertServerUnavailable.setTitle("Servidor de Jogo indisponível");
-                                alertServerUnavailable.show();
+
+
+                                pec.re_inicializa(NUM_PARES);
+                                pec.imagensRandomicas(pecas);
+
+                                jogada = 0;
+                                peca_virada1_pos = -1;
+                                peca_virada2_pos = -1;
+                                pares_virados = 0;
+
+                                textview.setTextColor(Color.rgb(0, 0, 0));
+                                textview.setTextSize(16);
+                                textview.setBackgroundColor(Color.rgb(255, 255, 255));
+                                textview.setText("  Total Pairs Flipped: 0");
+                                textview.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
+
+                                ImgAdptr.init(NUM_PARES);
+                                gridview.setAdapter(ImgAdptr);
+
+
+                            } catch (JSONException e) {
+                                System.out.println("Erro " + e);
                             }
                         }
-                    });
+                        else
+                        {
+                            alertServerUnavailable.setMessage("O servidor do jogo está indisponível, tente novamente.");
+                            alertServerUnavailable.setTitle("Servidor de Jogo indisponível");
+                            alertServerUnavailable.show();
+                        }
+                    }
+                });
 
-                    req.execute();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ConnException e) {
-                    alert.setMessage(e.getMessage());
-                    alert.setTitle("IP e Porta Server Jogo");
-                    alert.show();
-                }
+                req.execute();
 
             }
         });
@@ -221,11 +159,9 @@ public class MainActivity extends ActionBarActivity {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 ImageView imageView = (ImageView) v;
 
-                if (pec.getPecaV(position)) {
-
-
-                    // Estado 1 da jogada
-                    if (jogada == 0) {
+                // Estado 1 da jogada
+                try {
+                    if (pec.getPecaV(position)) if (jogada == 0) {
 
                         if (pares_virados > 0) {
                             textview.setText("  Total Pairs Flipped: " + pares_virados);
@@ -257,7 +193,7 @@ public class MainActivity extends ActionBarActivity {
                         jogada = 1;
 
                     }
-                    // Estado 2 da jogada
+    // Estado 2 da jogada
                     else if (jogada == 1) {
                         if (pec.getPecaV(position)) {
                             if (position != peca_virada1_pos) { // Para não permitir que cliques simultâneos em uma mesma posição contem como cartas viradas
@@ -286,8 +222,10 @@ public class MainActivity extends ActionBarActivity {
 
 
                     }
-
-
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ConnException e) {
+                    e.printStackTrace();
                 }
             }
 

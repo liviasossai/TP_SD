@@ -23,7 +23,7 @@ io_client.on('connect', function() {
 var NUM_PARES;
 var NUM_IMAGENS = 15;
 
-var IP = "192.168.0.11"; // COLOCAR IP DA MAQUINA
+var IP = "192.168.25.16"; // COLOCAR IP DA MAQUINA
 var porta = null; // Quando for testar sem ter que inicializar todos: escolher a porta de comunicacao, simulando o servidor eleito. ex.: 5000, para o servidor 3
 var list_servers = [3001, 4001, 5001, 6001]; //lista de servidores socket
 var lista_server = [3000, 4000, 5000, 6000]; //lista de servidores

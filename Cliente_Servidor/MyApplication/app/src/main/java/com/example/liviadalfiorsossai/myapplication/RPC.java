@@ -173,7 +173,7 @@ public class RPC {
         HttpURLConnection conn = null;
         System.setProperty("http.keepAlive", "false"); // must be set
         try {
-            String myurl = "http://192.168.12.6:7000";
+            String myurl = "http://192.168.25.16:7000";
             URL url = new URL(myurl);
             //System.setProperty("http.keepAlive", "false");
             conn = (HttpURLConnection) url.openConnection();
@@ -211,7 +211,7 @@ public class RPC {
                 // Convert the InputStream into a JSONObject   contentResultAsString = jobject.get("ip")
                 JSONObject jobject =  new JSONObject(sb.toString());
                 String ip = (String) jobject.get("ip");
-                String porta = (String) jobject.get("port");
+                String porta = (jobject.get("port")).toString();
 
                 return "http://" + ip+ ":" + porta;
             }
