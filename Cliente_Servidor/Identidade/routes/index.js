@@ -7,46 +7,13 @@ var router = express.Router();
 var http = require('http').Server(express).listen(7001);
 var io_server = require('socket.io')(http);
 
-
-/******************* Somente para teste gustavo**********************
-var io_client = require('socket.io-client')('http://localhost:3001');
-io_client.on('connect', function() {
-  console.log("socket conectado ao servidor 1 para iniciar eleicao");
-  io_client.emit('inic_eleicao', true);
-  setTimeout(function() {
-    io_client.disconnect();
-    }, 500);
-});
-/*********************************************************************/
-
-
 //************Inicio Jogo***********//
 var NUM_IMAGENS = 20;
 
-<<<<<<< HEAD
 var numPares = 8;
 
 
-<<<<<<< Updated upstream
-=======
 var pecas_jogo = embaralhaPecas(numPares);
-=======
->>>>>>> Stashed changes
-var IP = "192.168.25.16"; // COLOCAR IP DA MAQUINA
-var porta = null; // Quando for testar sem ter que inicializar todos: escolher a porta de comunicacao, simulando o servidor eleito. ex.: 5000, para o servidor 3
-var list_servers = [3001, 4001, 5001, 6001]; //lista de servidores socket
-var lista_server = [3000, 4000, 5000, 6000]; //lista de servidores
-//Socket servidor
-io_server.on('connection', function(socket) {
-
-
-  socket.on('elected', function(IP_e, porta_e) {
-    console.log('Um servidor foi eleito');
-    console.log("IP eleito: " + IP_e);
-    console.log("Porta eleito: " + porta_e);
-    //IP = IP_e;
-    porta = porta_e;
->>>>>>> origin/master
 
 // Variável que armazena como cada jogador verá o tabuleiro
 // É uma matriz cuja linhas são o tabuleiro de cada cliente
@@ -59,63 +26,6 @@ var tabuleiro_cliente = [];
  //   200: Carta não existente (o par já foi formado)
  //   Valor original (ID da img): carta liberada
 
-<<<<<<< HEAD
-=======
-  socket.on('failed', function(num_Server) {
-    console.log('Servidor ' + num_Server + 'falhou');
-
-    if (porta == list_servers[num_Server] + 1) {
-      var rand = Math.floor(Math.random() * 4);
-      while (rand == num_Server) {
-        var rand = Math.floor(Math.random() * 4);
-      }
-      var port_client = list_servers[rand];
-      var io_client = require('socket.io-client')('http://localhost:' + port_client);
-
-      //Socket cliente
-      io_client.on('connect', function() {
-        console.log("socket conectado ao servidor " + port_client + " para iniciar eleicao");
-        io_client.emit('inic_eleicao', true);
-      });
-      setTimeout(function() {
-        io_client.disconnect();
-      }, 1000);
-
-    }
-  });
-
-<<<<<<< Updated upstream
-
-  socket.on('failed', function(num_Server) {
-    console.log('Servidor ' + num_Server + 'falhou');
-
-    if (porta == list_servers[num_Server] + 1) {
-      var rand = Math.floor(Math.random() * 4);
-      while (rand == num_Server) {
-        var rand = Math.floor(Math.random() * 4);
-      }
-      var port_client = list_servers[rand];
-      var io_client = require('socket.io-client')('http://localhost:' + port_client);
-
-      //Socket cliente
-      io_client.on('connect', function() {
-        console.log("socket conectado ao servidor " + port_client + " para iniciar eleicao");
-        io_client.emit('inic_eleicao', true);
-      });
-      setTimeout(function() {
-        io_client.disconnect();
-      }, 1000);
-
-    }
-  });
-
-=======
->>>>>>> Stashed changes
-  socket.on('disconnect', function() {
-    console.log('user disconnected');
-  });
-});
->>>>>>> origin/master
 
 
 
@@ -182,7 +92,6 @@ function iniciaTab(numPares){
 //*******Inicio Requisicao RPC********//
 router.post('/', function(req, res) {
   var func = req.body.FUNCAO;
-<<<<<<< HEAD
     if (func == 'iniciaJogo') {
     //console.log("Função requisitada: peças");
     
@@ -194,42 +103,6 @@ router.post('/', function(req, res) {
       pos: pecas_jogo,
       id: ids_clientes[num_clientes-1]
     });
-=======
-
-  if (func == 'ContarPalavra') {
-    var str = req.body.TEXTO;
-    var tam = ContarPalavra(str);
-    res.json({
-      numWord: tam
-    });
-
-  } else if (func == 'embaralharPecas') {
-    console.log("Função requisitada: embaralhar peças");
-    NUM_PARES = req.body.num_pares;
-
-    var pecas_jogo = embaralhaPecas(NUM_PARES);
-    res.json({
-      pos: pecas_jogo
-    });
-
-  } else if (func == 'consulta') {
-      var rand = Math.floor(Math.random() * 4);
-      porta = lista_server[rand];
-      console.log('porta atual: '+porta);
-
-      Init_election();
-      res.json({
-        ip: IP,
-        port: porta
-      });
-
-
-  } else if (func == 'no_server') { // Servidor lider nao responde
-    Init_election();
-
-  } else {
-    res.json(undefined);
->>>>>>> origin/master
   }
   if (func == 'verificaPeca') {
     //console.log("Função requisitada: verificar/reservar peças");
@@ -328,36 +201,6 @@ router.post('/', function(req, res) {
 });
 
 
-
-function Init_election() {
-  var rand = Math.floor(Math.random() * 4);
-  var port_client = list_servers[rand];
-  var io_client = require('socket.io-client')('http://localhost:' + port_client);
-
-  //Socket cliente
-  io_client.on('connect', function() {
-    console.log("socket conectado ao servidor " + port_client + " para iniciar eleicao");
-    io_client.emit('inic_eleicao', true);
-  });
-  setTimeout(function() {
-    io_client.disconnect();
-  }, 1000);
-}
-
-function Init_election() {
-  var rand = Math.floor(Math.random() * 4);
-  var port_client = list_servers[rand];
-  var io_client = require('socket.io-client')('http://localhost:' + port_client);
-
-  //Socket cliente
-  io_client.on('connect', function() {
-    console.log("socket conectado ao servidor " + port_client + " para iniciar eleicao");
-    io_client.emit('inic_eleicao', true);
-  });
-  setTimeout(function() {
-    io_client.disconnect();
-  }, 1000);
-}
 
 
 module.exports = router;

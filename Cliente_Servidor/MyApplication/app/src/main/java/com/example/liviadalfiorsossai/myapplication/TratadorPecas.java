@@ -2,9 +2,7 @@ package com.example.liviadalfiorsossai.myapplication;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -151,49 +149,13 @@ public class TratadorPecas {
 
     // Usado quando uma peça sai do jogo (ou seja, quando um par já foi encontrado)
     public void setPecaValida(int posicao){
-        //TODO Lógica de informar o servidor de que foi formado o par
-        // Montagem do corpo da requisição
-        JSONObject jsonObj = new JSONObject();
-        try {
-
-            jsonObj.put("FUNCAO", "match");
-            jsonObj.put("num_pares", Integer.toString(NUM_PARES));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
         peca_valida[posicao] = false;
 
     }
 
     // Verifica se uma peça no jogo é válida (ou seja, se seu par ainda não foi encontrado)
-    public boolean getPecaV(int position) throws IOException, ConnException {
-        //TODO Lógica de validar peça no servidor
-        // Montagem do corpo da requisição
-        JSONObject jsonObj = new JSONObject();
-        try {
-
-            jsonObj.put("FUNCAO", "mayI");
-            jsonObj.put("pos", Integer.toString(position));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        JSONObject jsonreturned =  RPC.downloadUrl(jsonObj);
-        JSONArray isOK = null;
-        Boolean isOKboll = null;
-        try {
-            isOK = jsonreturned.getJSONArray("OK");
-            isOKboll = isOK.getBoolean(0);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        if (isOKboll){
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+    public boolean getPecaV(int position){
+     return peca_valida[position];
     }
 
 
