@@ -104,7 +104,16 @@ public class TratadorPecas {
     public void imagensRandomicas(int[] posi) {
 
         for(int i = 0; i < 2*NUM_PARES; i++){
-                pos[i] = mThumbIds[posi[i]];
+                if(posi[i] == 100) {
+                    pos[i] = R.drawable.f31;
+                }
+                else if(posi[i] == 200) {
+                    pos[i] = R.drawable.f30;
+                }
+            else{
+                    pos[i] = mThumbIds[posi[i]];
+                }
+
         }
     }
 
@@ -116,6 +125,10 @@ public class TratadorPecas {
 
     public int getNull(){
         return R.drawable.f30;
+    } // Retorna o código da imagem uma carta que não é mais válida
+
+    public int getBock(){
+        return R.drawable.f31;
     } // Retorna o código da imagem uma carta que não é mais válida
 
     public int getCover(){

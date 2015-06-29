@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ff21fbff"
+    android:weightSum="1">
+
+    <TextView
+        android:layout_width="383dp"
+        android:layout_height="wrap_content"
+        android:text="Memory Blocks Online"
+        android:id="@+id/textView3"
+        android:layout_weight="0.06"
+        android:textColor="#000"
+        android:textSize="16pt"
+        android:textAlignment="center" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:text="Seu apelido"
+        android:ems="10"
+        android:id="@+id/editText"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.06"
+        android:background="#FFF" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Encontrar Jogadores"
+        android:id="@+id/encJog"
+        android:layout_weight="0.06"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Jogadores Online"
+        android:id="@+id/textView4"
+        android:layout_weight="0.07"
+        android:textColor="#000"
+        android:textAlignment="center" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/jogOnline"
+        android:layout_weight="0.50" />
+
+</LinearLayout>

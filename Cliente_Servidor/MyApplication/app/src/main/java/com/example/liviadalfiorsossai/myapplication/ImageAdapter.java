@@ -65,13 +65,42 @@ public class ImageAdapter extends BaseAdapter {
 
 
 
-    public void init(int NUM){
+    public void init(int NUM, int [] pos){
 
         NUM_PARES = NUM;
 
         cover = new int[2*NUM_PARES];
         for(int i = 0; i < 2*NUM_PARES; i++){
-            cover[i] = R.drawable.f0;
+            if(pos[i] == 100) {
+                cover[i] = R.drawable.f31;
+            }
+            else if(pos[i] == 200) {
+                cover[i] = R.drawable.f30;
+            }
+            else{
+                cover[i] = R.drawable.f0;
+            }
+        }
+    }
+
+    public void renderiza(int NUM, int [] pos){
+
+        NUM_PARES = NUM;
+
+        cover = new int[2*NUM_PARES];
+        for(int i = 0; i < 2*NUM_PARES; i++){
+            if(pos[i] == 100) {
+                cover[i] = R.drawable.f31;
+            }
+            else if(pos[i] == 200) {
+                cover[i] = R.drawable.f30;
+            }
+            else if(pos[i] == -10) {
+                cover[i] = R.drawable.f0;
+            }
+            else{
+                cover[i] = mThumbIds[pos[i]];
+            }
         }
     }
 

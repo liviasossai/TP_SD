@@ -6,7 +6,6 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.util.Log;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,6 +31,16 @@ import java.sql.Connection;
 public class RPC {
 
     private static final String DEBUG_TAG = "HttpExample";
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+    private static String myurl = "http://192.168.0.105:7000";//Add endereco da URL
+    // Given a URL, establishes an HttpUrlConnection and retrieves
+// the web page content as a InputStream, which it returns as
+// a string.
+    public static JSONObject downloadUrl(JSONObject jsonObj) throws IOException {
+=======
+>>>>>>> Stashed changes
     //private static HttpURLConnection conn = null;
     //private static String myurl = "http://192.168.1.110:3000";//Add endereco da URL
     // Given a URL, establishes an HttpUrlConnection and retrieves
@@ -41,11 +50,14 @@ public class RPC {
         return getServerURLToConnect();
     }
     public static JSONObject downloadUrl(JSONObject jsonObj) throws IOException, ConnException {
+<<<<<<< Updated upstream
+=======
+>>>>>>> origin/master
+>>>>>>> Stashed changes
         InputStream is = null;
         HttpURLConnection conn = null;
         System.setProperty("http.keepAlive", "false"); // must be set
         try {
-            String myurl = getServerURLToConnect();
             URL url = new URL(myurl);
             conn = (HttpURLConnection) url.openConnection();
             //conn.setDoInput(true);
@@ -167,6 +179,9 @@ public class RPC {
             return false;
         }
     }
+<<<<<<< HEAD
+}
+=======
 
     private static String getServerURLToConnect() throws IOException, ConnException {
         InputStream is = null;
@@ -250,4 +265,9 @@ public class RPC {
         }
         return null;
     }
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> origin/master
+>>>>>>> Stashed changes
