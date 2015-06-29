@@ -15,6 +15,8 @@ var numPares = 8;
 
 var pecas_jogo = embaralhaPecas(numPares);
 
+var horario_local = 0;
+
 // Variável que armazena como cada jogador verá o tabuleiro
 // É uma matriz cuja linhas são o tabuleiro de cada cliente
 // e cada coluna uma posicão
@@ -29,13 +31,16 @@ var tabuleiro_cliente = [];
 
 
 
-var ids_possiveis = [0, 1, 2];
+var ids_possiveis = [0, 1, 2, 3];
 var ids_clientes = [];
 
 var pontuacao_clientes = []
 num_clientes = 0;
 
 var vencedor = -1;
+
+var heartbeat_clientes = []; // Armazena os heartbeats, para o caso de algum jogador deixar o jogo
+                             // Liberar os locks neste caso
 
 
 function embaralhaPecas(qtd_pares) {
@@ -168,6 +173,7 @@ router.post('/', function(req, res) {
             
             if (func == 'verificaStatus') {
             
+            heartbeat_clientes[req.body.id] = horario_local;
             
             // Verifica quem está ganhando
             var maior = pontuacao_clientes[0];
@@ -201,6 +207,33 @@ router.post('/', function(req, res) {
 });
 
 
+// A cada 30 segundo verifica se algum cliente desconectou
+// Neste caso os locks deverão ser liberados
+setInterval(function () {
+
+            horario_local = horario_local + 5;
+            
+            for(var i = 0; i < num_clientes; i++){
+                  if((horario_local - heartbeat_clientes[i] > 10) && heartbeat_clientes[i] != -1){
+                        heartbeat_clientes[i] = -1;
+                        var pecas_bloqueadas = [];
+                        for(var j = 0; j < 2*numPares; j++){
+                            if(tabuleiro_cliente[i][j] != 100 && tabuleiro_cliente[i][j] != 200 && tabuleiro_cliente[i][j] != -10){
+                                pecas_bloqueadas.push(j);
+                            }
+                        }
+                        for(var k = 0; k < num_clientes; k++){
+                            for(var l = 0; l < pecas_bloqueadas.length; l++){
+                                tabuleiro_cliente[k][pecas_bloqueadas[l]] = -10;
+                            }
+                        }
+            
+            
+                  }
+            }
+            
+            
+            }, 5000);
 
 
 module.exports = router;

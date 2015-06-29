@@ -54,13 +54,6 @@ public int ID_CLIENTE = 0;
 
 public int[] TABULEIRO_ATUAL;
 
-    int carta1 = -1;
-    int carta2 = -1;
-
-    int carta1_pos = -1;
-    int carta2_pos = -1;
-
-    int status = 0;
 
 
     public int porta; // O servidor responderá com o número da porta que o cliente deverá ouvir
@@ -96,7 +89,6 @@ public int[] TABULEIRO_ATUAL;
         final Button button = (Button) findViewById(R.id.button); // Iniciar novo jogo
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
 
 
                 // Montagem do corpo da requisição
